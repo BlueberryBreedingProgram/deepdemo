@@ -53,14 +53,34 @@ body {
     height: auto;
 }
 
-#emotions-container {
+#interaction-container {
     width: 100%;
     margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 #status {
     font-size: 1.5rem;
     text-align: center;
+}
+
+#countdown {
+    font-size: 3rem;
+    text-align: center;
+    margin: 1rem 0;
+}
+
+#start-button {
+    font-size: 1.5rem;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+}
+
+#emotions-container {
+    width: 100%;
+    margin-top: 1rem;
 }
 
 #emotions {

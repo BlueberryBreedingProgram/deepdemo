@@ -16,9 +16,14 @@
             <div id="logo-container">
                 <img src="https://i.imgur.com/XIExD09.png" alt="Logo 1" />
             </div>
-            <div id="emotions-container">
-                <h1 id="status">Loading...</h1>
-                <div id="emotions"></div>
+            <div id="interaction-container">
+                <h1 id="status">Grab a Sample and Get Started</h1>
+                <button id="start-button" onclick="startExperience()">Get Started</button>
+                <div id="countdown" style="display:none;">5</div>
+                <div id="message" style="display:none;">Taste your berries!</div>
+                <div id="emotions-container" style="display:none;">
+                    <div id="emotions"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -66,9 +71,10 @@
 
         const emotions = ["angry", "disgust", "fear", "happy", "neutral", "sad", "surprise"];
         let emotionModel = null;
-
         let output = null;
         let model = null;
+        let emotionData = [];
+        let trackingInterval = null;
 
         async function predictEmotion(points) {
             let result = tf.tidy(() => {
@@ -132,15 +138,67 @@
 
             if (points) {
                 let emotionPercentages = await predictEmotion(points);
-                let dominantEmotion = Object.keys(emotionPercentages).reduce((a, b) => (emotionPercentages[a] > emotionPercentages[b] ? a : b));
-                setText(`Detected: ${dominantEmotion}`);
-                displayEmotionPercentages(emotionPercentages);
-            } else {
-                setText("No Face");
+                emotionData.push(emotionPercentages);
             }
+        }
 
-            requestAnimationFrame(trackFace);
+        function startExperience() {
+            document.getElementById("start-button").style.display = "none";
+            document.getElementById("countdown").style.display = "block";
+            document.getElementById("message").style.display = "block";
+            let countdown = 5;
+            setText("");
+            emotionData = [];
+            trackingInterval = setInterval(trackFace, 100);
 
+            const countdownInterval = setInterval(() => {
+                document.getElementById("countdown").innerText = countdown;
+                if (countdown === 0) {
+                    clearInterval(countdownInterval);
+                    captureEmotions();
+                } else {
+                    countdown--;
+                }
+            }, 1000);
+        }
+
+        function captureEmotions() {
+            clearInterval(trackingInterval);  // Stop tracking to process emotions
+            const averagedEmotions = averageEmotions(emotionData);
+            const dominantEmotion = Object.keys(averagedEmotions).reduce((a, b) => (averagedEmotions[a] > averagedEmotions[b] ? a : b));
+            setText(`We detected ${dominantEmotion}!`);
+            document.getElementById("countdown").style.display = "none";
+            document.getElementById("message").style.display = "none";
+            document.getElementById("emotions-container").style.display = "block";
+            displayEmotionPercentages(averagedEmotions);
+            setTimeout(resetView, 6000);
+        }
+
+        function averageEmotions(data) {
+            const averaged = {};
+            data.forEach(emotions => {
+                for (const emotion in emotions) {
+                    if (!averaged[emotion]) averaged[emotion] = 0;
+                    averaged[emotion] += emotions[emotion];
+                }
+            });
+            for (const emotion in averaged) {
+                averaged[emotion] /= data.length;
+            }
+            return averaged;
+        }
+
+        function resetView() {
+            document.getElementById("status").innerText = "Grab a Sample and Get Started";
+            document.getElementById("start-button").style.display = "block";
+            document.getElementById("countdown").style.display = "none";
+            document.getElementById("message").style.display = "none";
+            document.getElementById("emotions-container").style.display = "none";
+            startTracking();  // Restart tracking to ensure webcam is active
+        }
+
+        async function startTracking() {
+            trackingInterval = setInterval(trackFace, 100);
         }
 
         (async () => {
@@ -170,9 +228,11 @@
             emotionModel = await tf.loadLayersModel('web/model/facemo.json');
 
             setText("Loaded!");
-
-            trackFace();
+            startTracking();  // Start tracking initially
         })();
     </script>
 </body>
 </html>
+
+
+
