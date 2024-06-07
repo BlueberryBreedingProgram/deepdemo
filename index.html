@@ -17,8 +17,8 @@
                 <img src="https://i.imgur.com/XIExD09.png" alt="Logo 1" />
             </div>
             <div id="interaction-container">
-                <h1 id="status">Grab a Sample and Get Started</h1>
-                <button id="start-button" onclick="startExperience()">Get Started</button>
+                <h1 id="status">Grab a Sample and ...</h1>
+                <button id="start-button" style="display: none;" onclick="startExperience()">Get Started</button>
                 <div id="countdown" style="display:none;">5</div>
                 <div id="message" style="display:none;">Taste your berries!</div>
                 <div id="emotions-container" style="display:none;">
@@ -149,7 +149,7 @@
             let countdown = 5;
             setText("");
             emotionData = [];
-            trackingInterval = setInterval(trackFace, 300);
+            trackingInterval = setInterval(trackFace, 400);
 
             const countdownInterval = setInterval(() => {
                 document.getElementById("countdown").innerText = countdown;
@@ -189,7 +189,7 @@
         }
 
         function resetView() {
-            document.getElementById("status").innerText = "Grab a Sample and Get Started";
+            document.getElementById("status").innerText = "Grab a Sample and ...";
             document.getElementById("start-button").style.display = "block";
             document.getElementById("countdown").style.display = "none";
             document.getElementById("message").style.display = "none";
@@ -227,12 +227,13 @@
 
             emotionModel = await tf.loadLayersModel('web/model/facemo.json');
 
-            setText("Loaded!");
+            document.getElementById("start-button").style.display = "block"; // Show the start button once everything is loaded
             startTracking();  // Start tracking initially
         })();
     </script>
 </body>
 </html>
+
 
 
 
